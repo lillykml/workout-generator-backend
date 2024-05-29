@@ -1,5 +1,9 @@
 const express = require('express')
+const cors = require('cors')
+
 const app = express()
+app.use(express.json())
+app.use(cors())
 
 let exercises = [
     {
@@ -59,11 +63,6 @@ app.get("/api/exercises", (req, res) => {
     res.json(exercises)
 })
 
-const PORT = process.env.PORT || 3001
-app.listen(PORT, () => {
-    console.log(`Server running on ${PORT}`)
-})
-
 app.get("/api/exercises/:id", (req,res) => {
     const id = req.params.id
     const exercise = exercises.find(e => e.id === id)
@@ -78,4 +77,40 @@ app.delete("/api/exercises/:id", (req,res) => {
     const id = req.params.id
     exercises = exercises.filter(e => e.id !== id)
     res.status(204).end()
+})
+
+
+// Generating and Modifing the workout
+const generateUniqueId = () => {
+return Math.random().toString(36).substr(2, 9);
+}
+
+app.post("/api/exercises", (req, res) => {
+    const body = req.body
+
+    if (!body.name || !body.repetitions) {
+        return res.status(400).json({ 
+          error: 'content missing' 
+        })
+      }
+
+    const newExercise = {
+        name: body.name,
+        repetitions: body.repetitions,
+        id: generateUniqueId()
+    }
+
+    exercises = exercises.concat(newExercise)
+    res.json(newExercise)
+})
+
+const unknownEndpoint = (request, response) => {
+    response.status(404).send({ error: 'unknown endpoint' })
+  }
+  
+app.use(unknownEndpoint)
+
+const PORT = process.env.PORT || 3001
+app.listen(PORT, () => {
+    console.log(`Server running on ${PORT}`)
 })
