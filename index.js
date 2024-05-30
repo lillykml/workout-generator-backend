@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
 
@@ -6,110 +7,70 @@ app.use(express.json())
 app.use(cors())
 app.use(express.static('dist'))
 
-let exercises = [
-    {
-      "id": "1",
-      "name": "Squats",
-      "repetitions": "15"
-    },
-    {
-      "id": "2",
-      "name": "Lunges",
-      "repetitions": "15"
-    },
-    {
-      "id": "3",
-      "name": "Sprint",
-      "repetitions": "400m"
-    },
-    {
-      "id": "4",
-      "name": "Row",
-      "repetitions": "1km"
-    },
-    {
-      "id": "c23a",
-      "name": "Sumo Squats",
-      "repetitions": "15"
-    },
-    {
-      "id": "14ce",
-      "name": "Jump Rope",
-      "repetitions": "5 Minutes"
-    },
-    {
-      "id": "9c5b",
-      "name": "Wallballs",
-      "repetitions": "30"
-    },
-    {
-      "id": "b1df",
-      "name": "Push Ups",
-      "repetitions": "10"
-    },
-    {
-      "id": "ab44",
-      "name": "Plank",
-      "repetitions": "50 seconds"
-    }
-  ]
+const Exercise = require('./models/workout')
 
-app.get("/", (req, res) => {
+// Routes
+app.get("/", (req, res, next) => {
     res.json({
         message: 'Access endpoint /api/exercises to display available exercises'
     })
+    .catch(error => next(error))
 })
 
-app.get("/api/exercises", (req, res) => {
-    res.json(exercises)
+app.get("/api/exercises", (req, res, next) => {
+  Exercise.find({})
+  .then(exercise => res.json(exercise))
+  .catch(error => next(error))
 })
 
-app.get("/api/exercises/:id", (req,res) => {
-    const id = req.params.id
-    const exercise = exercises.find(e => e.id === id)
+app.get("/api/exercises/:id", (req,res, next) => {
+  Exercise.findById(req.params.id)
+  .then(exercise => {
     if (exercise) {
-        res.json(exercise)
+      res.json(exercise)
     } else {
-        res.status(404).end()
+      res.status(404).end()
     }
+  })
+  .catch(error => next(error))
 })
 
-app.delete("/api/exercises/:id", (req,res) => {
-    const id = req.params.id
-    exercises = exercises.filter(e => e.id !== id)
+app.delete("/api/exercises/:id", (req,res, next) => {
+  Exercise.findByIdAndDelete(req.params.id)
+  .then(result => {
     res.status(204).end()
+  })
+  .catch(error => next(error))
 })
-
-
-// Generating and Modifing the workout
-const generateUniqueId = () => {
-return Math.random().toString(36).substr(2, 9);
-}
 
 app.post("/api/exercises", (req, res) => {
-    const body = req.body
-
-    if (!body.name || !body.repetitions) {
-        return res.status(400).json({ 
-          error: 'content missing' 
-        })
-      }
-
-    const newExercise = {
-        name: body.name,
-        repetitions: body.repetitions,
-        id: generateUniqueId()
-    }
-
-    exercises = exercises.concat(newExercise)
-    res.json(newExercise)
+  const newExercise = new Exercise({
+      name: req.body.name,
+      repetitions: req.body.repetitions,
+  })
+  newExercise
+  .save()
+  .then(exercise => {
+    res.json(exercise)
+  })
 })
 
 const unknownEndpoint = (request, response) => {
     response.status(404).send({ error: 'unknown endpoint' })
   }
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } else if (error.name === 'ValidationError') {
+    return response.status(404).send({error: 'Missing Exercise Name or Repetitions'})  
+  }
+  next(error)
+}
   
 app.use(unknownEndpoint)
+app.use(errorHandler)
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
