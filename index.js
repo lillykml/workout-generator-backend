@@ -43,7 +43,7 @@ app.delete("/api/exercises/:id", (req,res, next) => {
   .catch(error => next(error))
 })
 
-app.post("/api/exercises", (req, res) => {
+app.post("/api/exercises", (req, res, next) => {
   const newExercise = new Exercise({
       name: req.body.name,
       repetitions: req.body.repetitions,
@@ -53,6 +53,7 @@ app.post("/api/exercises", (req, res) => {
   .then(exercise => {
     res.json(exercise)
   })
+  .catch(error => next(error))
 })
 
 const unknownEndpoint = (request, response) => {
