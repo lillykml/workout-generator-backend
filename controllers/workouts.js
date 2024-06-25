@@ -2,43 +2,32 @@ const workoutRouter = require('express').Router()
 const Exercise = require('../models/workout')
 
 
-workoutRouter.get("/", (req, res, next) => {
-  Exercise.find({})
-  .then(exercise => res.json(exercise))
-  .catch(error => next(error))
+workoutRouter.get("/", async (req, res) => {
+  const exercises = await Exercise.find({})
+  res.json(exercises)
 })
 
-workoutRouter.get("/:id", (req,res, next) => {
-  Exercise.findById(req.params.id)
-  .then(exercise => {
-    if (exercise) {
+workoutRouter.get("/:id", async (req, res) => {
+  const exercise = await Exercise.findById(req.params.id)
+  if (exercise) {
       res.json(exercise)
-    } else {
+  } else {
       res.status(404).end()
-    }
-  })
-  .catch(error => next(error))
+  }
 })
 
-workoutRouter.delete("/:id", (req,res, next) => {
-  Exercise.findByIdAndDelete(req.params.id)
-  .then(result => {
-    res.status(204).end()
-  })
-  .catch(error => next(error))
+workoutRouter.delete("/:id", async (req, res) => {
+  await Exercise.findByIdAndDelete(req.params.id)
+  res.status(204).end()
 })
 
-workoutRouter.post("/", (req, res, next) => {
+workoutRouter.post("/", async (req, res) => {
   const newExercise = new Exercise({
       name: req.body.name,
       repetitions: req.body.repetitions,
   })
-  newExercise
-  .save()
-  .then(exercise => {
-    res.json(exercise)
-  })
-  .catch(error => next(error))
+  const savedExercise = await newExercise.save()
+  res.json(savedExercise)
 })
 
 module.exports = workoutRouter

@@ -2,6 +2,7 @@
 const config = require('./utils/config')
 const express = require('express')
 const cors = require('cors')
+require('express-async-errors')
 const workoutRouter = require('./controllers/workouts')
 const middleware = require('./utils/middleware')
 const mongoose = require('mongoose')
