@@ -4,6 +4,7 @@ const express = require('express')
 const cors = require('cors')
 require('express-async-errors')
 const workoutRouter = require('./controllers/workouts')
+const userRouter = require('./controllers/users')
 const middleware = require('./utils/middleware')
 const mongoose = require('mongoose')
 
@@ -26,6 +27,7 @@ app.use(cors())
 app.use(express.static('dist'))
 
 app.use('/api/exercises', workoutRouter)
+app.use('/api/users', userRouter)
 
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
