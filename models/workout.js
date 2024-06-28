@@ -8,6 +8,11 @@ const exerciseSchema = new mongoose.Schema({
     repetitions: {
         type: String,
         required: true,
+    },
+    category: {
+      type: String,
+      required: true,
+      enum: ['upper body', 'lower body', 'abs', 'full body'],
     }
 })
 

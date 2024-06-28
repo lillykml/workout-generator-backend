@@ -21,10 +21,16 @@ workoutRouter.delete("/:id", async (req, res) => {
   res.status(204).end()
 })
 
+workoutRouter.delete("/", async(req, res) => {
+  await Exercise.findOneAndDelete()
+  res.status(204).end()
+})
+
 workoutRouter.post("/", async (req, res) => {
   const newExercise = new Exercise({
       name: req.body.name,
       repetitions: req.body.repetitions,
+      category: req.body.category
   })
   const savedExercise = await newExercise.save()
   res.json(savedExercise)
