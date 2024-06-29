@@ -1,22 +1,24 @@
 const mongoose = require('mongoose')
 
-const exerciseSchema = new mongoose.Schema({
+const workoutSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
     }, 
-    repetitions: {
-        type: String,
-        required: true,
-    },
-    category: {
-      type: String,
-      required: true,
-      enum: ['upper body', 'lower body', 'abs', 'full body'],
+    exercises: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Exercise'
+        }
+    ],
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Exercise',
+        required: true
     }
 })
 
-exerciseSchema.set('toJSON', {
+userSchema.set('toJSON', {
     transform: (document, returnedObject) => {
       returnedObject.id = returnedObject._id.toString()
       delete returnedObject._id
@@ -24,4 +26,4 @@ exerciseSchema.set('toJSON', {
     }
   })
 
-module.exports = mongoose.model('Exercise', exerciseSchema)
+module.exports = mongoose.model('Workout', workoutSchema)
