@@ -2,7 +2,7 @@ const workoutRouter = require('express').Router()
 const Workout = require('../models/workout')
 
 workoutRouter.get('/', async(request, response) => {
-    const workouts = await Workout.find({})
+    const workouts = await Workout.find({}).populate('exercises', {name: 1, repetitions: 1, category: 1})
     response.json(workouts)
 })
 
